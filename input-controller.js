@@ -1,19 +1,24 @@
-export class controller{
+export class Controller{
     static ACTION_ACTIVATED = "input-controller:action-activated"
 
     static ACTION_DEACTIVATED = "input-controller:action-deactivated"
-    constructor(actionsToBind, target){
+    constructor(actionsToBind={}, target =null){
         this.enabled = true
         this.focused = true
 
         this.actions = {}
         this.pressedKeys = new Set()
+        this.bindActions(actionsToBind)
     }
 
     bindActions(actionsToBind){
         for(const actionName in actionsToBind){
-            action = actionsToBind[actionName]
+            const action = actionsToBind[actionName]
             if(!this.actions[actionName]){
+                this.actions[actionName] = {
+                    keys:[],
+                    enabled:true
+                };
                 this.actions[actionName].keys = action.keys || [];
                 this.actions[actionName].enabled = action.enabled || true;
             }
@@ -44,7 +49,8 @@ export class controller{
     }
 
     isActionActive(action){
-        if(this.actions[action].enabled == true)
+        const val = this.actions[action];
+        if(val.keys.some(key => this.pressedKeys.has(key)))
             return true;
         else
             return false;
