@@ -37,7 +37,7 @@ export class Controller{
         this.actions[actionName].enabled = false;
     }
 
-    attach(target, dontEnable=false){
+    attach(target){
         this.target = target;
         target.addEventListener("keydown", (event)=>{this.pressedKeys.add(event.keyCode)});
         target.addEventListener("keyup", (event)=>{this.pressedKeys.delete(event.keyCode)});

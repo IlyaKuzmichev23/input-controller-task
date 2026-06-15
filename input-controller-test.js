@@ -10,6 +10,24 @@ const controller = new Controller({
     }
 })
 
+
+checkBind = (btn) => {
+    controller.bindActions(btn);
+}
+
+checkEnable = (name) => {
+    controller.enableAction(name);
+}
+
+checkDisable = (name) => {
+    controller.disableAction(name);
+}
+
+checkAttach = (target) => {
+
+}
+
+
 controller.attach(window);
 
 setInterval(()=>{
