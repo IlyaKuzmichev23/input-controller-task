@@ -11,29 +11,48 @@ const controller = new Controller({
 })
 
 
-checkBind = (btn) => {
-    controller.bindActions(btn);
+const checkBind = () => {
+    controller.bindActions({
+        "left":{
+            keys:[65]
+        },
+        "jump":{
+            keys:[32]
+        }
+    });
+    console.log(controller.actions);
 }
 
-checkEnable = (name) => {
-    controller.enableAction(name);
+const checkEnable = () => {
+    controller.enableAction("left");
+
+    console.log(controller.actions.left.enabled);
 }
 
-checkDisable = (name) => {
-    controller.disableAction(name);
+const checkDisable = () => {
+    controller.disableAction("left");
+
+    console.log(controller.actions.left.enabled);
+
 }
 
-checkAttach = (target) => {
+const checkAttach = () => {
+    controller.attach("window");
 
+    console.log("successfull attached");
 }
 
+const checkDetach = () => {
+    controller.detach();
 
-controller.attach(window);
+    console.log("successfull detached");
+}
 
-setInterval(()=>{
-    console.log("A", controller.isKeyPressed(65));
-    console.log("D", controller.isKeyPressed(68));
-    console.log("left", controller.isActionActive("left"));
-    console.log("right", controller.isActionActive("right"));
-},100)
+const checkActionActive = () => {
+    console.log(controller.isActionActive("left"));
+}
+
+const checkPressKey = () => {
+    console.log(controller.isKeyPressed(65));
+}
 

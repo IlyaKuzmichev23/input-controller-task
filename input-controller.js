@@ -2,13 +2,29 @@ export class Controller{
     static ACTION_ACTIVATED = "input-controller:action-activated"
 
     static ACTION_DEACTIVATED = "input-controller:action-deactivated"
-    constructor(actionsToBind={}, target =null){
+    constructor(actionsToBind={}, target = null){
         this.enabled = true
         this.focused = true
 
+
         this.actions = {}
         this.pressedKeys = new Set()
+
+        this.keyDown = (event) => {
+
+            if(this.pressedKeys.has(event.keyCode))
+                return
+
+            this.pressedKeys.add(event.keyCode)
+        }
+        this.keyUp = (event) => {
+            this.pressedKeys.delete(event.keyCode)
+        }
+
         this.bindActions(actionsToBind)
+
+        if(target)
+            this.attach(target)
     }
 
     bindActions(actionsToBind){
@@ -20,11 +36,11 @@ export class Controller{
                     enabled:true
                 };
                 this.actions[actionName].keys = action.keys || [];
-                this.actions[actionName].enabled = action.enabled || true;
+                this.actions[actionName].enabled = action.enabled ?? true;
             }
             else{
                 this.actions[actionName].keys = [...new Set([...this.actions[actionName].keys, ...action.keys])];
-                this.actions[actionName].enabled = action[actionName].enabled || true;
+                this.actions[actionName].enabled = action.enabled ?? true;
             }
         }
     }
@@ -39,17 +55,19 @@ export class Controller{
 
     attach(target){
         this.target = target;
-        target.addEventListener("keydown", (event)=>{this.pressedKeys.add(event.keyCode)});
-        target.addEventListener("keyup", (event)=>{this.pressedKeys.delete(event.keyCode)});
+        target.addEventListener("keydown", this.keyDown);
+        target.addEventListener("keyup", this.keyUp);
     }
 
     detach(){
-        this.target.removeEventListener("keydown", (event)=>{this.pressedKeys.add(event.keyCode)});
-        this.target.removeEventListener("keyup", (event)=>{this.pressedKeys.add(event.keyCode)});
+        this.target.removeEventListener("keydown", this.keyDown);
+        this.target.removeEventListener("keyup", this.keyUp);
     }
 
     isActionActive(action){
         const val = this.actions[action];
+        if(!val.enabled)
+            return false
         if(val.keys.some(key => this.pressedKeys.has(key)))
             return true;
         else
