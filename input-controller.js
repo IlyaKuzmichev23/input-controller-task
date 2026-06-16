@@ -102,7 +102,7 @@ export class InputController{
     }
 
     isActionActive(action){ 
-        //this.checkFocus();
+        this.checkFocus();
 
         if(!this.actions[action])
             return false;
