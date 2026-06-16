@@ -1,4 +1,4 @@
-export class Controller{
+export class InputController{
     static ACTION_ACTIVATED = "input-controller:action-activated"
 
     static ACTION_DEACTIVATED = "input-controller:action-deactivated"
@@ -14,11 +14,46 @@ export class Controller{
 
             if(this.pressedKeys.has(event.keyCode))
                 return
-
             this.pressedKeys.add(event.keyCode)
+
+            for(const actionName in this.actions){
+                const action = this.actions[actionName]
+                if(!action.enabled)
+                    continue;
+                if(action.keys.includes(event.keyCode)){
+                    this.target.dispatchEvent(
+                        new CustomEvent(
+                            InputController.ACTION_ACTIVATED,
+                            {
+                                detail:actionName
+                            }
+                        )
+                    )
+                }
+            }
         }
         this.keyUp = (event) => {
+
+            if(!this.pressedKeys.has(event.keyCode))
+                return
+
             this.pressedKeys.delete(event.keyCode)
+
+            for(const actionName in this.actions){
+                const action = this.actions[actionName]
+                if(!action.enabled)
+                    continue
+                if(action.keys.includes(event.keyCode)){
+                    this.target.dispatchEvent(
+                        new CustomEvent(
+                            InputController.ACTION_DEACTIVATED,
+                            {
+                                detail:actionName
+                            }
+                        )
+                    )
+                }
+            }
         }
 
         this.bindActions(actionsToBind)
@@ -67,12 +102,11 @@ export class Controller{
     }
 
     isActionActive(action){ 
+        //this.checkFocus();
+
         if(!this.actions[action])
             return false;
         const val = this.actions[action];
-        // console.log(val.enabled)
-        // console.log(this.actions)
-        // console.log(this.pressedKeys)
         if(!val.enabled)
             return false;
         if(val.keys.some(key => this.pressedKeys.has(key))){
@@ -87,5 +121,13 @@ export class Controller{
             return true;
         else
             return false;
+    }
+
+    checkFocus(){
+        this.focused = document.hasFocus()
+
+        if(!this.focused){
+            this.pressedKeys.clear();
+        }
     }
 }

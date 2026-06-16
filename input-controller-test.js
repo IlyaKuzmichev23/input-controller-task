@@ -1,6 +1,6 @@
-import { Controller } from "./input-controller.js";
+import { InputController } from "./input-controller.js";
 
-const controller = new Controller({
+const controller = new InputController({
     "left":{
         keys:[37,65],
         enabled: false
@@ -84,16 +84,26 @@ const square = document.getElementById('square');
 let x = square.offsetLeft;
 
 setInterval(() => {
-    if(controller.isActionActive("left")){
-        console.log("LEFT");
-        x-=10;
-    }
-    if(controller.isActionActive("right")){
-        console.log("RIGHT");
-        x+=10;
-    }
-    if(controller.isActionActive("jump"))
-        square.style.backgroundColor = "green"
-    square.style.left = x+"px";
+        controller.focused = true;
+        controller.enabled = true;
+        if(controller.isActionActive("left")){
+            x-=10;
+        }
+        if(controller.isActionActive("right")){
+            x+=10;
+        }
+        if(controller.isActionActive("jump"))
+            square.style.backgroundColor = "green";
+
+        square.style.left = x+"px";
 },20)
+
+//ивенты
+window.addEventListener(InputController.ACTION_ACTIVATED, 
+    (event) => {console.log('activate', event.detail)}
+)
+
+window.addEventListener(InputController.ACTION_DEACTIVATED, 
+    (event) => {console.log('deactivate', event.detail)}
+)
 
