@@ -7,8 +7,9 @@ const controller = new Controller({
     },
     "right":{
         keys:[39,68],
-    }
-})
+    }},
+    window
+)
 
 
 const checkBind = () => {
@@ -37,7 +38,7 @@ const checkDisable = () => {
 }
 
 const checkAttach = () => {
-    controller.attach("window");
+    controller.attach(window);
 
     console.log("successfull attached");
 }
@@ -55,4 +56,44 @@ const checkActionActive = () => {
 const checkPressKey = () => {
     console.log(controller.isKeyPressed(65));
 }
+
+
+//кнопки из html
+const button1 = document.querySelector("#bindAction");
+const button2 = document.querySelector("#enableAction");
+const button3 = document.querySelector("#disableAction");
+const button4 = document.querySelector("#attach");
+const button5 = document.querySelector("#detach");
+const button6 = document.querySelector("#isActionActive");
+const button7 = document.querySelector("#isKeyPressed");
+
+
+//добавление слушателей на событие клик
+button1.addEventListener('click', checkBind);
+button2.addEventListener('click', checkEnable);
+button3.addEventListener('click', checkDisable);
+button4.addEventListener('click', checkAttach);
+button5.addEventListener('click', checkDetach);
+button6.addEventListener('click', checkActionActive);
+button7.addEventListener('click', checkPressKey);
+
+//движение квадрата
+
+const square = document.getElementById('square');
+
+let x = square.offsetLeft;
+
+setInterval(() => {
+    if(controller.isActionActive("left")){
+        console.log("LEFT");
+        x-=10;
+    }
+    if(controller.isActionActive("right")){
+        console.log("RIGHT");
+        x+=10;
+    }
+    if(controller.isActionActive("jump"))
+        square.style.backgroundColor = "green"
+    square.style.left = x+"px";
+},20)
 

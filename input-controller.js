@@ -40,7 +40,7 @@ export class Controller{
             }
             else{
                 this.actions[actionName].keys = [...new Set([...this.actions[actionName].keys, ...action.keys])];
-                this.actions[actionName].enabled = action.enabled ?? true;
+                this.actions[actionName].enabled = action.enabled ?? this.actions[actionName].enabled ?? true;
             }
         }
     }
@@ -55,21 +55,29 @@ export class Controller{
 
     attach(target){
         this.target = target;
-        target.addEventListener("keydown", this.keyDown);
-        target.addEventListener("keyup", this.keyUp);
+        this.target.addEventListener("keydown", this.keyDown);
+        this.target.addEventListener("keyup", this.keyUp);
     }
 
     detach(){
-        this.target.removeEventListener("keydown", this.keyDown);
-        this.target.removeEventListener("keyup", this.keyUp);
+        if(this.target){
+            this.target.removeEventListener("keydown", this.keyDown);
+            this.target.removeEventListener("keyup", this.keyUp);
+        }
     }
 
-    isActionActive(action){
+    isActionActive(action){ 
+        if(!this.actions[action])
+            return false;
         const val = this.actions[action];
+        // console.log(val.enabled)
+        // console.log(this.actions)
+        // console.log(this.pressedKeys)
         if(!val.enabled)
-            return false
-        if(val.keys.some(key => this.pressedKeys.has(key)))
+            return false;
+        if(val.keys.some(key => this.pressedKeys.has(key))){
             return true;
+        }
         else
             return false;
     }
