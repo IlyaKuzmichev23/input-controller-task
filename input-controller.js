@@ -72,6 +72,10 @@ export class InputController{
 
     isActionActive(action){ 
 
+        if(!this.enabled){
+            return;
+        }
+
         if(!this.actions[action])
             return false;
         const val = this.actions[action];
@@ -92,6 +96,10 @@ export class InputController{
     }
 
     keyDown(event){
+        
+        if(!this.enabled){
+            return;
+        }
 
         if(this.pressedKeys.has(event.keyCode))
             return
@@ -118,7 +126,11 @@ export class InputController{
     }
 
     keyUp(event){
-
+        
+        if(!this.enabled){
+            return;
+        }
+        
         if(!this.pressedKeys.has(event.keyCode))
             return
 
