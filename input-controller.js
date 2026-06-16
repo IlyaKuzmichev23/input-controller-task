@@ -10,52 +10,6 @@ export class InputController{
         this.actions = {}
         this.pressedKeys = new Set()
 
-        this.keyDown = (event) => {
-
-            if(this.pressedKeys.has(event.keyCode))
-                return
-            this.pressedKeys.add(event.keyCode)
-
-            for(const actionName in this.actions){
-                const action = this.actions[actionName]
-                if(!action.enabled)
-                    continue;
-                if(action.keys.includes(event.keyCode)){
-                    this.target.dispatchEvent(
-                        new CustomEvent(
-                            InputController.ACTION_ACTIVATED,
-                            {
-                                detail:actionName
-                            }
-                        )
-                    )
-                }
-            }
-        }
-        this.keyUp = (event) => {
-
-            if(!this.pressedKeys.has(event.keyCode))
-                return
-
-            this.pressedKeys.delete(event.keyCode)
-
-            for(const actionName in this.actions){
-                const action = this.actions[actionName]
-                if(!action.enabled)
-                    continue
-                if(action.keys.includes(event.keyCode)){
-                    this.target.dispatchEvent(
-                        new CustomEvent(
-                            InputController.ACTION_DEACTIVATED,
-                            {
-                                detail:actionName
-                            }
-                        )
-                    )
-                }
-            }
-        }
-
         this.bindActions(actionsToBind)
 
         if(target)
@@ -68,14 +22,17 @@ export class InputController{
             if(!this.actions[actionName]){
                 this.actions[actionName] = {
                     keys:[],
-                    enabled:true
+                    enabled:true,
+                    active:false
                 };
                 this.actions[actionName].keys = action.keys || [];
                 this.actions[actionName].enabled = action.enabled ?? true;
+                this.actions[actionName].active = false;
             }
             else{
                 this.actions[actionName].keys = [...new Set([...this.actions[actionName].keys, ...action.keys])];
                 this.actions[actionName].enabled = action.enabled ?? this.actions[actionName].enabled ?? true;
+                this.actions[actionName].active = false;
             }
         }
     }
@@ -128,6 +85,64 @@ export class InputController{
 
         if(!this.focused){
             this.pressedKeys.clear();
+        }
+    }
+
+    keyDown = (event) => {
+
+        if(this.pressedKeys.has(event.keyCode))
+            return
+        this.pressedKeys.add(event.keyCode)
+
+        for(const actionName in this.actions){
+            const action = this.actions[actionName]
+            if(!action.enabled)
+                continue;
+            if(action.keys.includes(event.keyCode)){
+                if(action.active)
+                    continue
+                action.active = true;
+                this.target.dispatchEvent(
+                    new CustomEvent(
+                        InputController.ACTION_ACTIVATED,
+                        {
+                            detail:actionName
+                        }
+                    )
+                )
+            }
+        }
+    }
+
+    keyUp = (event) => {
+
+        if(!this.pressedKeys.has(event.keyCode))
+            return
+
+        this.pressedKeys.delete(event.keyCode)
+
+        for(const actionName in this.actions){
+            const action = this.actions[actionName]
+            if(!action.enabled)
+                continue
+            
+            const temp = action.keys.some(key =>this.pressedKeys.has(key))
+
+            if(temp)
+                continue;
+
+            action.active = false;
+
+            if(action.keys.includes(event.keyCode)){
+                this.target.dispatchEvent(
+                    new CustomEvent(
+                        InputController.ACTION_DEACTIVATED,
+                        {
+                            detail:actionName
+                        }
+                    )
+                )
+            }
         }
     }
 }
