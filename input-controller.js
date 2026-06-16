@@ -4,7 +4,13 @@ export class InputController{
     static ACTION_DEACTIVATED = "input-controller:action-deactivated"
     constructor(actionsToBind={}, target = null){
         this.enabled = true
-        this.focused = true
+        this.focused = document.hasFocus();
+
+        this.keyDown = this.keyDown.bind(this);
+        this.keyUp = this.keyUp.bind(this);
+
+        this.onFocus = this.onFocus.bind(this);
+        this.onBlure = this.onBlure.bind(this);
 
 
         this.actions = {}
@@ -49,17 +55,22 @@ export class InputController{
         this.target = target;
         this.target.addEventListener("keydown", this.keyDown);
         this.target.addEventListener("keyup", this.keyUp);
+
+        window.addEventListener("focus", this.onFocus)
+        window.addEventListener("blur", this.onBlure)
     }
 
     detach(){
         if(this.target){
             this.target.removeEventListener("keydown", this.keyDown);
             this.target.removeEventListener("keyup", this.keyUp);
+
+            window.removeEventListener("focus", this.onFocus)
+            window.removeEventListener("blur", this.onBlure)
         }
     }
 
     isActionActive(action){ 
-        this.checkFocus();
 
         if(!this.actions[action])
             return false;
@@ -80,15 +91,7 @@ export class InputController{
             return false;
     }
 
-    checkFocus(){
-        this.focused = document.hasFocus()
-
-        if(!this.focused){
-            this.pressedKeys.clear();
-        }
-    }
-
-    keyDown = (event) => {
+    keyDown(event){
 
         if(this.pressedKeys.has(event.keyCode))
             return
@@ -114,7 +117,7 @@ export class InputController{
         }
     }
 
-    keyUp = (event) => {
+    keyUp(event){
 
         if(!this.pressedKeys.has(event.keyCode))
             return
@@ -144,5 +147,14 @@ export class InputController{
                 )
             }
         }
+    }
+
+    onFocus(){
+        this.focused = true
+    }
+
+    onBlure(){
+        this.focused = false
+        this.pressedKeys.clear();
     }
 }
