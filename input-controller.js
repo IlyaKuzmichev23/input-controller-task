@@ -95,8 +95,7 @@ export class InputController{
             return false;
     }
 
-    keyDown(event){
-        
+    keyDown(event){        
         if(!this.enabled){
             return;
         }
@@ -168,5 +167,16 @@ export class InputController{
     onBlure(){
         this.focused = false
         this.pressedKeys.clear();
+    }
+
+    enableController(){
+        this.enabled = true
+    }
+
+    disableController(){
+        this.enabled = false
+        this.pressedKeys.clear()
+        for(const actionName in this.actions)
+            this.actions[actionName].active = false;
     }
 }

@@ -57,6 +57,14 @@ const checkPressKey = () => {
     console.log(controller.isKeyPressed(65));
 }
 
+const enableController = () =>{
+    controller.enableController();
+}
+
+const disableController = () =>{
+    controller.disableController();
+}
+
 
 //кнопки из html
 const button1 = document.querySelector("#bindAction");
@@ -66,7 +74,8 @@ const button4 = document.querySelector("#attach");
 const button5 = document.querySelector("#detach");
 const button6 = document.querySelector("#isActionActive");
 const button7 = document.querySelector("#isKeyPressed");
-
+const button8 = document.querySelector("#enableController");
+const button9 = document.querySelector("#disableController");
 
 //добавление слушателей на событие клик
 button1.addEventListener('click', checkBind);
@@ -76,6 +85,8 @@ button4.addEventListener('click', checkAttach);
 button5.addEventListener('click', checkDetach);
 button6.addEventListener('click', checkActionActive);
 button7.addEventListener('click', checkPressKey);
+button8.addEventListener('click', enableController);
+button9.addEventListener('click', disableController);
 
 //движение квадрата
 
@@ -84,8 +95,8 @@ const square = document.getElementById('square');
 let x = square.offsetLeft;
 
 setInterval(() => {
-        controller.focused = true;
-        controller.enabled = true;
+        // controller.focused = true;
+        // controller.enabled = true;
         if(controller.isActionActive("left")){
             x-=10;
         }
