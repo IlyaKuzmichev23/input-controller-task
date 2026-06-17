@@ -67,6 +67,10 @@ export class InputController{
 
             window.removeEventListener("focus", this.onFocus)
             window.removeEventListener("blur", this.onBlure)
+
+            this.pressedKeys.clear()
+            for(const actionName in this.actions)
+                this.actions[actionName].active = false;
         }
     }
 
