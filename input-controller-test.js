@@ -1,6 +1,10 @@
 import { InputController } from "./input-controller.js";
+import { KeyboardPlugin } from "./keyboard-pugin.js";
 
-const controller = new InputController({
+const keyboard = new KeyboardPlugin();
+
+const controller = new InputController(keyboard,
+    {
     "left":{
         keys:[37,65],
         enabled: false

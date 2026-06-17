@@ -2,19 +2,20 @@ export class InputController{
     static ACTION_ACTIVATED = "input-controller:action-activated"
 
     static ACTION_DEACTIVATED = "input-controller:action-deactivated"
-    constructor(actionsToBind={}, target = null){
-        this.enabled = true
+    constructor(plugin, actionsToBind={}, target = null){
+        this.plugin = plugin;
+
+        this.enabled = true;
         this.focused = document.hasFocus();
 
-        this.keyDown = this.keyDown.bind(this);
-        this.keyUp = this.keyUp.bind(this);
+        this.handleKeyDown = this.handleKeyDown.bind(this);
+        this.handleKeyUp = this.handleKeyUp.bind(this);
 
         this.onFocus = this.onFocus.bind(this);
         this.onBlure = this.onBlure.bind(this);
 
 
         this.actions = {}
-        this.pressedKeys = new Set()
 
         this.bindActions(actionsToBind)
 
@@ -53,8 +54,8 @@ export class InputController{
 
     attach(target){
         this.target = target;
-        this.target.addEventListener("keydown", this.keyDown);
-        this.target.addEventListener("keyup", this.keyUp);
+        this.target.addEventListener("keydown", this.handleKeyDown);
+        this.target.addEventListener("keyup", this.handleKeyUp);
 
         window.addEventListener("focus", this.onFocus)
         window.addEventListener("blur", this.onBlure)
@@ -62,13 +63,13 @@ export class InputController{
 
     detach(){
         if(this.target){
-            this.target.removeEventListener("keydown", this.keyDown);
-            this.target.removeEventListener("keyup", this.keyUp);
+            this.target.removeEventListener("keydown", this.handleKeyDown);
+            this.target.removeEventListener("keyup", this.handleKeyUp);
 
             window.removeEventListener("focus", this.onFocus)
             window.removeEventListener("blur", this.onBlure)
 
-            this.pressedKeys.clear()
+            this.plugin.pressedKeys.clear()
             for(const actionName in this.actions)
                 this.actions[actionName].active = false;
         }
@@ -85,83 +86,14 @@ export class InputController{
         const val = this.actions[action];
         if(!val.enabled)
             return false;
-        if(val.keys.some(key => this.pressedKeys.has(key))){
-            return true;
-        }
-        else
-            return false;
+        return this.plugin.isActionActive(val);
     }
 
     isKeyPressed(keyCode){
-        if(this.pressedKeys.has(keyCode))
+        if(this.plugin.pressedKeys.has(keyCode))
             return true;
         else
             return false;
-    }
-
-    keyDown(event){        
-        if(!this.enabled){
-            return;
-        }
-
-        if(this.pressedKeys.has(event.keyCode))
-            return
-        this.pressedKeys.add(event.keyCode)
-
-        for(const actionName in this.actions){
-            const action = this.actions[actionName]
-            if(!action.enabled)
-                continue;
-            if(action.keys.includes(event.keyCode)){
-                if(action.active)
-                    continue
-                action.active = true;
-                this.target.dispatchEvent(
-                    new CustomEvent(
-                        InputController.ACTION_ACTIVATED,
-                        {
-                            detail:actionName
-                        }
-                    )
-                )
-            }
-        }
-    }
-
-    keyUp(event){
-        
-        if(!this.enabled){
-            return;
-        }
-        
-        if(!this.pressedKeys.has(event.keyCode))
-            return
-
-        this.pressedKeys.delete(event.keyCode)
-
-        for(const actionName in this.actions){
-            const action = this.actions[actionName]
-            if(!action.enabled)
-                continue
-            
-            const temp = action.keys.some(key =>this.pressedKeys.has(key))
-
-            if(temp)
-                continue;
-
-            action.active = false;
-
-            if(action.keys.includes(event.keyCode)){
-                this.target.dispatchEvent(
-                    new CustomEvent(
-                        InputController.ACTION_DEACTIVATED,
-                        {
-                            detail:actionName
-                        }
-                    )
-                )
-            }
-        }
     }
 
     onFocus(){
@@ -170,7 +102,7 @@ export class InputController{
 
     onBlure(){
         this.focused = false
-        this.pressedKeys.clear();
+        this.plugin.pressedKeys.clear();
     }
 
     enableController(){
@@ -179,8 +111,59 @@ export class InputController{
 
     disableController(){
         this.enabled = false
-        this.pressedKeys.clear()
+        this.plugin.pressedKeys.clear()
         for(const actionName in this.actions)
             this.actions[actionName].active = false;
+    }
+
+    handleKeyDown(event){
+        const change = this.plugin.keyDown(event);
+        if(!change)
+            return;
+        this.updateActions();
+    }
+    handleKeyUp(event){
+        const change = this.plugin.keyUp(event);
+        if(!change)
+            return;
+        this.updateActions();
+    }
+
+    updateActions(){
+        if(!this.enabled){
+            return;
+        }
+
+        for(const actionName in this.actions){
+            const action = this.actions[actionName];
+
+            if(!action.enabled)
+                continue;
+
+            const activeNow = this.plugin.isActionActive(action);
+
+            if(activeNow && !action.active){
+                action.active = true;
+                this.target.dispatchEvent(
+                    new CustomEvent(
+                        InputController.ACTION_ACTIVATED,
+                        {
+                            detail:actionName
+                        }
+                    )
+                );
+            }
+            else if(!activeNow && action.active){
+                action.active = false;
+                this.target.dispatchEvent(
+                    new CustomEvent(
+                        InputController.ACTION_DEACTIVATED,
+                        {
+                            detail:actionName
+                        }
+                    )
+                );
+            }
+        }
     }
 }
