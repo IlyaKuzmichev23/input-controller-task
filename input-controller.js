@@ -8,9 +8,6 @@ export class InputController{
         this.enabled = true;
         this.focused = document.hasFocus();
 
-        this.handleKeyDown = this.handleKeyDown.bind(this);
-        this.handleKeyUp = this.handleKeyUp.bind(this);
-
         this.onFocus = this.onFocus.bind(this);
         this.onBlure = this.onBlure.bind(this);
 
@@ -28,20 +25,30 @@ export class InputController{
             const action = actionsToBind[actionName]
             if(!this.actions[actionName]){
                 this.actions[actionName] = {
-                    keys:[],
+                    ...action,
                     enabled:true,
                     active:false
                 };
-                this.actions[actionName].keys = action.keys || [];
-                this.actions[actionName].enabled = action.enabled ?? true;
-                this.actions[actionName].active = false;
+                Object.assign(this.actions[actionName], action)
             }
             else{
-                this.actions[actionName].keys = [...new Set([...this.actions[actionName].keys, ...action.keys])];
-                this.actions[actionName].enabled = action.enabled ?? this.actions[actionName].enabled ?? true;
-                this.actions[actionName].active = false;
+                Object.assign(this.actions[actionName], action)
             }
         }
+    }
+
+    isActionActive(action){ 
+
+        if(!this.enabled){
+            return;
+        }
+        if(!this.actions[action])
+            return false;
+        const val = this.actions[action];
+        if(!val.enabled)
+            return false;
+        this.updateActions();
+        return this.plugin.isActionActive(val);
     }
 
     enableAction(actionName){
@@ -54,8 +61,7 @@ export class InputController{
 
     attach(target){
         this.target = target;
-        this.target.addEventListener("keydown", this.handleKeyDown);
-        this.target.addEventListener("keyup", this.handleKeyUp);
+        this.plugin.attach(target);
 
         window.addEventListener("focus", this.onFocus)
         window.addEventListener("blur", this.onBlure)
@@ -63,37 +69,13 @@ export class InputController{
 
     detach(){
         if(this.target){
-            this.target.removeEventListener("keydown", this.handleKeyDown);
-            this.target.removeEventListener("keyup", this.handleKeyUp);
+            this.plugin.detach(this.target)
 
-            window.removeEventListener("focus", this.onFocus)
-            window.removeEventListener("blur", this.onBlure)
-
-            this.plugin.pressedKeys.clear()
             for(const actionName in this.actions)
                 this.actions[actionName].active = false;
+            window.removeEventListener("focus", this.onFocus)
+            window.removeEventListener("blur", this.onBlure)
         }
-    }
-
-    isActionActive(action){ 
-
-        if(!this.enabled){
-            return;
-        }
-
-        if(!this.actions[action])
-            return false;
-        const val = this.actions[action];
-        if(!val.enabled)
-            return false;
-        return this.plugin.isActionActive(val);
-    }
-
-    isKeyPressed(keyCode){
-        if(this.plugin.pressedKeys.has(keyCode))
-            return true;
-        else
-            return false;
     }
 
     onFocus(){
@@ -102,7 +84,7 @@ export class InputController{
 
     onBlure(){
         this.focused = false
-        this.plugin.pressedKeys.clear();
+        this.plugin.reset();
     }
 
     enableController(){
@@ -111,22 +93,9 @@ export class InputController{
 
     disableController(){
         this.enabled = false
-        this.plugin.pressedKeys.clear()
+        this.plugin.reset();
         for(const actionName in this.actions)
             this.actions[actionName].active = false;
-    }
-
-    handleKeyDown(event){
-        const change = this.plugin.keyDown(event);
-        if(!change)
-            return;
-        this.updateActions();
-    }
-    handleKeyUp(event){
-        const change = this.plugin.keyUp(event);
-        if(!change)
-            return;
-        this.updateActions();
     }
 
     updateActions(){

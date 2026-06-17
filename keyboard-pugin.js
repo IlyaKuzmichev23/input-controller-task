@@ -23,4 +23,20 @@ export class KeyboardPlugin{
         this.pressedKeys.delete(event.keyCode);
         return true;
     }
+
+    attach(target){
+        target.addEventListener("keydown", this.keyDown);
+        target.addEventListener("keyup", this.keyUp);
+    }
+
+    detach(target){
+        target.removeEventListener("keydown", this.keyDown);
+        target.removeEventListener("keyup", this.keyUp);
+
+        this.reset();
+    }
+
+    reset(){
+        this.pressedKeys.clear();
+    }
 }

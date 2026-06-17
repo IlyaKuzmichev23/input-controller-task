@@ -1,9 +1,10 @@
 import { InputController } from "./input-controller.js";
 import { KeyboardPlugin } from "./keyboard-pugin.js";
+import { MousePlugin } from "./mouse-plugin.js";
 
 const keyboard = new KeyboardPlugin();
 
-const controller = new InputController(keyboard,
+const controllerKeyboard = new InputController(keyboard,
     {
     "left":{
         keys:[37,65],
@@ -17,7 +18,7 @@ const controller = new InputController(keyboard,
 
 
 const checkBind = () => {
-    controller.bindActions({
+    controllerKeyboard.bindActions({
         "left":{
             keys:[65]
         },
@@ -25,48 +26,40 @@ const checkBind = () => {
             keys:[32]
         }
     });
-    console.log(controller.actions);
+    console.log(controllerKeyboard.actions);
 }
 
 const checkEnable = () => {
-    controller.enableAction("left");
+    controllerKeyboard.enableAction("left");
 
-    console.log(controller.actions.left.enabled);
+    console.log(controllerKeyboard.actions.left.enabled);
 }
 
 const checkDisable = () => {
-    controller.disableAction("left");
+    controllerKeyboard.disableAction("left");
 
-    console.log(controller.actions.left.enabled);
+    console.log(controllerKeyboard.actions.left.enabled);
 
 }
 
 const checkAttach = () => {
-    controller.attach(window);
+    controllerKeyboard.attach(window);
 
     console.log("successfull attached");
 }
 
 const checkDetach = () => {
-    controller.detach();
+    controllerKeyboard.detach();
 
     console.log("successfull detached");
 }
 
-const checkActionActive = () => {
-    console.log(controller.isActionActive("left"));
-}
-
-const checkPressKey = () => {
-    console.log(controller.isKeyPressed(65));
-}
-
 const enableController = () =>{
-    controller.enableController();
+    controllerKeyboard.enableController();
 }
 
 const disableController = () =>{
-    controller.disableController();
+    controllerKeyboard.disableController();
 }
 
 
@@ -76,8 +69,6 @@ const button2 = document.querySelector("#enableAction");
 const button3 = document.querySelector("#disableAction");
 const button4 = document.querySelector("#attach");
 const button5 = document.querySelector("#detach");
-const button6 = document.querySelector("#isActionActive");
-const button7 = document.querySelector("#isKeyPressed");
 const button8 = document.querySelector("#enableController");
 const button9 = document.querySelector("#disableController");
 
@@ -87,8 +78,6 @@ button2.addEventListener('click', checkEnable);
 button3.addEventListener('click', checkDisable);
 button4.addEventListener('click', checkAttach);
 button5.addEventListener('click', checkDetach);
-button6.addEventListener('click', checkActionActive);
-button7.addEventListener('click', checkPressKey);
 button8.addEventListener('click', enableController);
 button9.addEventListener('click', disableController);
 
@@ -99,15 +88,13 @@ const square = document.getElementById('square');
 let x = square.offsetLeft;
 
 setInterval(() => {
-        // controller.focused = true;
-        // controller.enabled = true;
-        if(controller.isActionActive("left")){
+        if(controllerMouse.isActionActive("left")){
             x-=10;
         }
-        if(controller.isActionActive("right")){
+        if(controllerMouse.isActionActive("right")){
             x+=10;
         }
-        if(controller.isActionActive("jump"))
+        if(controllerMouse.isActionActive("jump"))
             square.style.backgroundColor = "green";
 
         square.style.left = x+"px";
@@ -120,5 +107,26 @@ window.addEventListener(InputController.ACTION_ACTIVATED,
 
 window.addEventListener(InputController.ACTION_DEACTIVATED, 
     (event) => {console.log('deactivate', event.detail)}
+)
+
+
+
+
+
+
+const mouse = new MousePlugin();
+
+const controllerMouse = new InputController(mouse,
+    {
+    "left":{
+        button:0,
+    },
+    "jump":{
+        button:1,
+    },
+    "right":{
+        button:2,
+    }},
+    window
 )
 
