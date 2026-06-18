@@ -2,8 +2,8 @@ export class InputController{
     static ACTION_ACTIVATED = "input-controller:action-activated"
 
     static ACTION_DEACTIVATED = "input-controller:action-deactivated"
-    constructor(plugin, actionsToBind={}, target = null){
-        this.plugin = plugin;
+    constructor(plugins, actionsToBind={}, target = null){
+        this.plugins = plugins;
 
         this.enabled = true;
         this.focused = document.hasFocus();
@@ -48,7 +48,10 @@ export class InputController{
         if(!val.enabled)
             return false;
         this.updateActions();
-        return this.plugin.isActionActive(val);
+        for(const numb in this.plugins)
+            if(this.plugins[numb].isActionActive(val))
+                return true;
+        return false;
     }
 
     enableAction(actionName){
@@ -61,15 +64,17 @@ export class InputController{
 
     attach(target){
         this.target = target;
-        this.plugin.attach(target);
-
+        for (const numb in this.plugins){
+            this.plugins[numb].attach(target);
+        }
         window.addEventListener("focus", this.onFocus)
         window.addEventListener("blur", this.onBlure)
     }
 
     detach(){
         if(this.target){
-            this.plugin.detach(this.target)
+            for(const numb in this.plugins)
+                this.plugins[numb].detach(this.target)
 
             for(const actionName in this.actions)
                 this.actions[actionName].active = false;
@@ -84,7 +89,8 @@ export class InputController{
 
     onBlure(){
         this.focused = false
-        this.plugin.reset();
+        for(const numb in this.plugins)
+            this.plugins[numb].reset();
     }
 
     enableController(){
@@ -93,7 +99,8 @@ export class InputController{
 
     disableController(){
         this.enabled = false
-        this.plugin.reset();
+        for(const numb in this.plugins)
+            this.plugins[numb].reset();
         for(const actionName in this.actions)
             this.actions[actionName].active = false;
     }
@@ -109,7 +116,14 @@ export class InputController{
             if(!action.enabled)
                 continue;
 
-            const activeNow = this.plugin.isActionActive(action);
+            let activeNow = null;
+            
+            for(const numb in this.plugins){
+                if(this.plugins[numb].isActionActive(action))
+                    activeNow = true;
+            }
+            if(!activeNow)
+                activeNow = false;
 
             if(activeNow && !action.active){
                 action.active = true;

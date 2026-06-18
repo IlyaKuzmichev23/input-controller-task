@@ -2,11 +2,19 @@
 <html>
 <head>
   <title></title>
+  <style>
+    .no-select {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+  </style>
 </head>
 <body>
   <script type="module" src="./input-controller-test.js"></script>
   <div id="square" style="position: absolute; left: 500px; top: 300px; width: 200px;height: 200px;background: #3e92cc;"></div>
-  <div class="buttons" style="margin: 200px;">
+  <div class="no-select" style="margin: 200px;" >
     <button id="bindAction">BindAction</button>
     <button id="enableAction">enableAction</button>
     <button id="disableAction">disableAction</button>
@@ -14,6 +22,7 @@
     <button id="detach">detach</button>
     <button id="enableController">enableController</button>
     <button id="disableController">disableController</button>
-
+  </div>
+  
 </body>
 </html>

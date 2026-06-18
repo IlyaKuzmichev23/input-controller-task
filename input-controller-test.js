@@ -4,21 +4,28 @@ import { MousePlugin } from "./mouse-plugin.js";
 
 const keyboard = new KeyboardPlugin();
 
-const controllerKeyboard = new InputController(keyboard,
+const mouse = new MousePlugin();
+
+const controller = new InputController([keyboard, mouse],
     {
     "left":{
         keys:[37,65],
-        enabled: false
+        button:0,
+    },
+    "jump":{
+        keys:[32],
+        button:1
     },
     "right":{
         keys:[39,68],
+        button:2
     }},
     window
 )
 
 
 const checkBind = () => {
-    controllerKeyboard.bindActions({
+    controller.bindActions({
         "left":{
             keys:[65]
         },
@@ -30,36 +37,36 @@ const checkBind = () => {
 }
 
 const checkEnable = () => {
-    controllerKeyboard.enableAction("left");
+    controller.enableAction("left");
 
     console.log(controllerKeyboard.actions.left.enabled);
 }
 
 const checkDisable = () => {
-    controllerKeyboard.disableAction("left");
+    controller.disableAction("left");
 
     console.log(controllerKeyboard.actions.left.enabled);
 
 }
 
 const checkAttach = () => {
-    controllerKeyboard.attach(window);
+    controller.attach(window);
 
     console.log("successfull attached");
 }
 
 const checkDetach = () => {
-    controllerKeyboard.detach();
+    controller.detach();
 
     console.log("successfull detached");
 }
 
 const enableController = () =>{
-    controllerKeyboard.enableController();
+    controller.enableController();
 }
 
 const disableController = () =>{
-    controllerKeyboard.disableController();
+    controller.disableController();
 }
 
 
@@ -81,24 +88,15 @@ button5.addEventListener('click', checkDetach);
 button8.addEventListener('click', enableController);
 button9.addEventListener('click', disableController);
 
+
+
+
+
 //движение квадрата
 
 const square = document.getElementById('square');
 
 let x = square.offsetLeft;
-
-setInterval(() => {
-        if(controllerMouse.isActionActive("left")){
-            x-=10;
-        }
-        if(controllerMouse.isActionActive("right")){
-            x+=10;
-        }
-        if(controllerMouse.isActionActive("jump"))
-            square.style.backgroundColor = "green";
-
-        square.style.left = x+"px";
-},20)
 
 //ивенты
 window.addEventListener(InputController.ACTION_ACTIVATED, 
@@ -111,22 +109,15 @@ window.addEventListener(InputController.ACTION_DEACTIVATED,
 
 
 
+setInterval(() => {
+        if(controller.isActionActive("left")){
+            x-=10;
+        }
+        if(controller.isActionActive("right")){
+            x+=10;
+        }
+        if(controller.isActionActive("jump"))
+            square.style.backgroundColor = "green";
 
-
-
-const mouse = new MousePlugin();
-
-const controllerMouse = new InputController(mouse,
-    {
-    "left":{
-        button:0,
-    },
-    "jump":{
-        button:1,
-    },
-    "right":{
-        button:2,
-    }},
-    window
-)
-
+        square.style.left = x+"px";
+},20)

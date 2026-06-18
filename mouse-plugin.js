@@ -1,6 +1,14 @@
 export class MousePlugin{
     constructor(){
         this.pressedButtons = new Set();
+        document.addEventListener('contextmenu', event => event.preventDefault());
+        // document.addEventListener('mousedown', (event) => {
+        //     if(event.detail > 1 ) {
+        //         event.preventDefault();
+        //     }
+        // });
+
+
 
         this.buttonDown = this.buttonDown.bind(this);
         this.buttonUp = this.buttonUp.bind(this);
