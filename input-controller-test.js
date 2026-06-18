@@ -33,19 +33,19 @@ const checkBind = () => {
             keys:[32]
         }
     });
-    console.log(controllerKeyboard.actions);
+    console.log(controller.actions);
 }
 
 const checkEnable = () => {
     controller.enableAction("left");
 
-    console.log(controllerKeyboard.actions.left.enabled);
+    console.log(controller.actions.left.enabled);
 }
 
 const checkDisable = () => {
     controller.disableAction("left");
 
-    console.log(controllerKeyboard.actions.left.enabled);
+    console.log(controller.actions.left.enabled);
 
 }
 
